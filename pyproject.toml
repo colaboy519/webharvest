@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "webharvest"
+version = "0.2.0"
+description = "Self-hosted web scraper that converts any webpage into agent-friendly markdown, HTML, or structured JSON. Includes anti-bot bypass and autonomous browser agents."
+requires-python = ">=3.11"
+dependencies = [
+    "httpx[http2]>=0.27",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.0",
+    "markdownify>=0.13",
+    "readability-lxml>=0.8",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "typer[all]>=0.12",
+    "tenacity>=9.0",
+    "diskcache>=5.6",
+    "aiolimiter>=1.1",
+]
+
+[project.optional-dependencies]
+browser = ["playwright>=1.45"]
+search = ["duckduckgo-search>=6.0"]
+# Anti-bot: TLS impersonation + stealth browser + fingerprint generation
+stealth = ["curl-cffi>=0.14", "patchright>=1.50", "browserforge>=1.2"]
+# Autonomous browser agent (LLM-driven)
+agent = ["browser-use>=0.1", "patchright>=1.50"]
+# CAPTCHA solving (bring your own API key)
+captcha = ["2captcha-python>=2.0"]
+# Everything
+all = ["webharvest[browser,search,stealth,agent,captcha]"]
+
+[project.scripts]
+webharvest = "webharvest.cli.main:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["webharvest"]
