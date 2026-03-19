@@ -1,24 +1,46 @@
 # WebHarvest
 
-Self-hosted web scraper that converts any webpage into agent-friendly markdown, HTML, or structured JSON. Includes anti-bot bypass and autonomous browser agents.
+Web scraper plugin that converts any webpage into agent-friendly markdown, HTML, or structured JSON. **Runs 100% locally** on whoever installs it — no server, no cloud, no data leaves your machine.
 
-**Free, open-source alternative to Firecrawl** — run it on your own machine, no API keys needed for basic scraping.
+Free, open-source alternative to Firecrawl.
+
+## Install
+
+```bash
+pip install webharvest
+```
+
+That's it. Everything runs on your machine.
+
+### Optional extras
+
+```bash
+pip install webharvest[stealth]   # Anti-bot: curl_cffi + Patchright + BrowserForge
+pip install webharvest[agent]     # Autonomous agent: browser-use + Patchright
+pip install webharvest[browser]   # JS rendering: Playwright
+pip install webharvest[search]    # Web search: DuckDuckGo
+pip install webharvest[captcha]   # CAPTCHA solving: 2Captcha
+pip install webharvest[all]       # Everything
+```
 
 ## Features
 
-| Feature | CLI | API | Description |
-|---------|-----|-----|-------------|
-| **Scrape** | `webharvest scrape <url>` | `POST /v1/scrape` | Any URL → clean markdown, HTML, JSON with metadata |
-| **Crawl** | `webharvest crawl <url>` | `POST /v1/crawl` | BFS website crawl, depth-limited, concurrent |
-| **Extract** | `webharvest extract <url>` | `POST /v1/extract` | CSS selectors → structured JSON |
-| **Search** | `webharvest search "query"` | `POST /v1/search` | DuckDuckGo search + scrape each result |
-| **Agent** | `webharvest agent "task"` | `POST /v1/agent` | LLM-driven autonomous browsing |
-| **Agent Extract** | `webharvest agent-extract <url>` | `POST /v1/agent/extract` | Natural language data extraction (no selectors needed) |
-| **Serve** | `webharvest serve` | — | Start REST API on port 8787 |
+| Feature | Command | Description |
+|---------|---------|-------------|
+| **Scrape** | `webharvest scrape <url>` | Any URL → clean markdown, HTML, JSON with metadata |
+| **Crawl** | `webharvest crawl <url>` | BFS website crawl, depth-limited, concurrent |
+| **Extract** | `webharvest extract <url>` | CSS selectors → structured JSON |
+| **Search** | `webharvest search "query"` | DuckDuckGo search + scrape each result |
+| **Agent** | `webharvest agent "task"` | LLM-driven autonomous browsing |
+| **Agent Extract** | `webharvest agent-extract <url>` | Natural language extraction (no selectors needed) |
 
-### Anti-Bot Bypass (Escalation Ladder)
+### Anti-Bot Bypass (auto-escalation)
 
-WebHarvest can automatically escalate through increasingly aggressive bypass strategies:
+```bash
+webharvest scrape https://protected-site.com --mode smart
+```
+
+Automatically escalates through increasingly aggressive bypass strategies:
 
 | Level | Method | Speed | What it beats |
 |-------|--------|-------|---------------|
@@ -26,8 +48,6 @@ WebHarvest can automatically escalate through increasingly aggressive bypass str
 | 1 | curl_cffi TLS impersonation | ~200ms | JA3/JA4 fingerprint checks |
 | 2 | Patchright + BrowserForge | ~3-5s | JS challenges, headless detection |
 | 3 | Stealth browser + CAPTCHA solver | ~20-60s | reCAPTCHA, Turnstile, hCaptcha |
-
-Use `--mode smart` to auto-escalate, or pick a level explicitly:
 
 ```bash
 webharvest scrape https://example.com                          # Level 0 (default)
@@ -46,28 +66,9 @@ webharvest agent-extract https://example.com/product --prompt "product name, pri
 
 Powered by [browser-use](https://github.com/browser-use/browser-use). Supports OpenAI, Anthropic, and Google as LLM backends.
 
-## Quick Start
+## Usage
 
-### Install
-
-```bash
-pip install webharvest
-```
-
-### Optional extras
-
-```bash
-pip install webharvest[stealth]   # Anti-bot: curl_cffi + Patchright + BrowserForge
-pip install webharvest[agent]     # Autonomous agent: browser-use + Patchright
-pip install webharvest[browser]   # JS rendering: Playwright
-pip install webharvest[search]    # Web search: DuckDuckGo
-pip install webharvest[captcha]   # CAPTCHA solving: 2Captcha
-pip install webharvest[all]       # Everything
-```
-
-### Usage
-
-**CLI:**
+### CLI
 
 ```bash
 # Scrape a page to markdown
@@ -76,7 +77,7 @@ webharvest scrape https://example.com
 # Get JSON with metadata and links
 webharvest scrape https://example.com --format json
 
-# Scrape a JS-heavy page
+# Scrape a JS-heavy SPA
 webharvest scrape https://spa-site.com --mode browser
 
 # Scrape a bot-protected page (auto-escalate)
@@ -95,27 +96,7 @@ webharvest agent-extract https://example.com/product --prompt "name, price, revi
 webharvest agent "Search Google Scholar for 'transformer architecture' and get the top 10 paper titles"
 ```
 
-**REST API:**
-
-```bash
-# Start the server
-webharvest serve
-
-# Scrape
-curl -X POST http://localhost:8787/v1/scrape \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://example.com", "formats": ["markdown", "metadata", "links"]}'
-
-# Scrape with anti-bot
-curl -X POST http://localhost:8787/v1/scrape \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://protected-site.com", "fetch_mode": "smart"}'
-
-# Interactive API docs
-open http://localhost:8787/docs
-```
-
-**Python:**
+### Python library
 
 ```python
 import asyncio
@@ -142,15 +123,12 @@ All settings via environment variables (prefix `WEBHARVEST_`) or `.env` file:
 cp .env.example .env
 ```
 
-Key settings:
-
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `WEBHARVEST_VERIFY_SSL` | `true` | Set `false` if you have cert issues |
 | `WEBHARVEST_MAX_CONCURRENT` | `5` | Max parallel requests |
 | `WEBHARVEST_CACHE_TTL` | `3600` | Response cache TTL (seconds) |
 | `WEBHARVEST_PROXY_URLS` | `[]` | JSON array of proxy URLs |
-| `WEBHARVEST_API_PORT` | `8787` | REST API port |
 
 For the agent, set your LLM API key:
 
@@ -180,7 +158,6 @@ webharvest/
 │   ├── proxy.py             Proxy rotation
 │   ├── useragent.py         UA rotation
 │   └── retry.py             Exponential backoff
-├── api/                     FastAPI REST server
 ├── cli/                     Typer CLI
 ├── models/                  Pydantic schemas
 └── cache/                   SQLite disk cache
@@ -190,14 +167,13 @@ webharvest/
 
 | | WebHarvest | Firecrawl |
 |---|---|---|
-| **Price** | Free / self-hosted | $16+/mo |
+| **Price** | Free | $16+/mo |
+| **Runs on** | Your machine | Their cloud |
+| **Data leaves your machine** | Never | Yes (their servers process it) |
 | **Anti-bot** | curl_cffi + Patchright + BrowserForge | Managed proxy fleet |
 | **LLM extraction** | BYO API key (OpenAI/Anthropic/Google) | Built-in |
 | **CAPTCHA solving** | 2Captcha integration (BYO key) | Built-in |
 | **Scale** | Single machine | Distributed infrastructure |
-| **Setup** | `pip install webharvest` | API key signup |
-
-WebHarvest handles ~80-90% of scraping needs. Firecrawl's remaining value is managed infrastructure at scale.
 
 ## License
 

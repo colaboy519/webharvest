@@ -1,6 +1,8 @@
 """
 CLI interface — human-friendly commands for all WebHarvest features.
 
+Everything runs locally on the machine that installed it. No server needed.
+
 Commands:
   webharvest scrape <url>           Scrape a single page → markdown
   webharvest crawl <url>            Crawl a website (BFS, depth-limited)
@@ -8,7 +10,6 @@ Commands:
   webharvest search <query>         Web search + scrape each result
   webharvest agent <task>           Run autonomous browser agent (LLM-driven)
   webharvest agent-extract <url>    LLM-powered extraction (natural language)
-  webharvest serve                  Start the REST API server
 
 Examples:
   webharvest scrape https://example.com
@@ -19,7 +20,6 @@ Examples:
   webharvest search "python web scraping" --num 5
   webharvest agent "Go to HN and get the top 5 stories"
   webharvest agent-extract https://example.com/product --prompt "name, price, rating"
-  webharvest serve --port 8787
 """
 
 from __future__ import annotations
@@ -33,7 +33,7 @@ import typer
 
 app = typer.Typer(
     name="webharvest",
-    help="Self-hosted web scraper — convert any URL to agent-friendly content.\n\nIncludes anti-bot bypass and autonomous browser agents.",
+    help="Web scraper plugin — convert any URL to agent-friendly content. Runs 100% locally.\n\nIncludes anti-bot bypass and autonomous browser agents.",
     no_args_is_help=True,
 )
 
@@ -255,22 +255,6 @@ def agent_extract(
         typer.echo(json.dumps(result.extracted_data, indent=2, ensure_ascii=False))
     else:
         typer.echo(result.extracted_data or "No data extracted")
-
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#  SERVE
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-@app.command()
-def serve(
-    host: str = typer.Option("0.0.0.0", "--host", help="Bind address"),
-    port: int = typer.Option(8787, "--port", "-p", help="Port"),
-):
-    """Start the WebHarvest REST API server."""
-    import uvicorn
-
-    typer.echo(f"Starting WebHarvest API on http://{host}:{port}")
-    typer.echo(f"Docs: http://localhost:{port}/docs")
-    uvicorn.run("webharvest.api.app:create_app", factory=True, host=host, port=port)
 
 
 def _slugify(url: str) -> str:

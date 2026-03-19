@@ -42,9 +42,6 @@ class Settings(BaseSettings):
     use_browser: bool = False
     browser_headless: bool = True
 
-    # ── API server ───────────────────────────────────────────
-    api_host: str = "0.0.0.0"
-    api_port: int = 8787
 
 
 settings = Settings()

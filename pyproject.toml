@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "webharvest"
-version = "0.2.0"
-description = "Self-hosted web scraper that converts any webpage into agent-friendly markdown, HTML, or structured JSON. Includes anti-bot bypass and autonomous browser agents."
+version = "0.3.0"
+description = "Web scraper plugin that converts any webpage into agent-friendly markdown, HTML, or structured JSON. Runs 100% locally. Includes anti-bot bypass and autonomous browser agents."
 requires-python = ">=3.11"
 dependencies = [
     "httpx[http2]>=0.27",
@@ -15,8 +15,6 @@ dependencies = [
     "readability-lxml>=0.8",
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
-    "fastapi>=0.115",
-    "uvicorn[standard]>=0.30",
     "typer[all]>=0.12",
     "tenacity>=9.0",
     "diskcache>=5.6",
